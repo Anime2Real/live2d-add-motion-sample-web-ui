@@ -44,7 +44,7 @@ def resolve_runtime():
     cfg_path = os.path.join(ROOT, "model.config.json")
     if not os.path.exists(cfg_path):
         sys.exit("ERROR: model.config.json not found. Run python3 tools/setup_model.py first.")
-    cfg = json.load(open(cfg_path))
+    cfg = json.load(open(cfg_path, encoding="utf-8"))
     return os.path.join(ROOT, os.path.dirname(cfg["model3"]))
 
 
@@ -123,8 +123,8 @@ def sampled_values(curve, steps=8):
 
 def main():
     model3_path = glob.glob(os.path.join(RUNTIME, "*.model3.json"))[0]
-    model3 = json.load(open(model3_path))
-    entries = model3["FileReferences"]["Motions"].get(GROUP, [])
+    model3 = json.load(open(model3_path, encoding="utf-8"))
+    entries = model3.get("FileReferences", {}).get("Motions", {}).get(GROUP, [])
     if not entries:
         print(f"NG: model3.json has no {GROUP} group")
         return 1
@@ -143,7 +143,7 @@ def main():
     safe = {}
     first_vals = collections.defaultdict(collections.Counter)
     for f in existing:
-        for c in json.load(open(f))["Curves"]:
+        for c in json.load(open(f, encoding="utf-8"))["Curves"]:
             if c["Target"] != "Parameter":
                 continue
             pts, *_ = points(c)
@@ -165,7 +165,7 @@ def main():
         if not os.path.exists(f):
             errors.append(f"{name}: referenced by model3.json but the file does not exist")
             continue
-        d = json.load(open(f))
+        d = json.load(open(f, encoding="utf-8"))
         meta = d["Meta"]
         loop = bool(meta.get("Loop"))
         nseg_total = npt_total = 0

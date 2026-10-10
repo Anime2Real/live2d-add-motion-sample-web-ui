@@ -50,7 +50,7 @@ def resolve_runtime():
     cfg_path = os.path.join(ROOT, "model.config.json")
     if not os.path.exists(cfg_path):
         sys.exit("ERROR: model.config.json not found. Run python3 tools/setup_model.py first.")
-    cfg = json.load(open(cfg_path))
+    cfg = json.load(open(cfg_path, encoding="utf-8"))
     return os.path.join(ROOT, os.path.dirname(cfg["model3"]))
 
 
@@ -169,7 +169,7 @@ def main():
     # Verify every referenced parameter exists in the model (when cdi3.json is present)
     cdi_files = glob.glob(os.path.join(runtime, "*.cdi3.json"))
     if cdi_files:
-        available = {p["Id"] for p in json.load(open(cdi_files[0]))["Parameters"]}
+        available = {p["Id"] for p in json.load(open(cdi_files[0], encoding="utf-8"))["Parameters"]}
         missing = sorted({
             c["Id"] for m in motions.values() for c in m["Curves"]
             if c["Target"] == "Parameter" and c["Id"] not in available
@@ -184,7 +184,7 @@ def main():
     os.makedirs(motion_dir, exist_ok=True)
     for name, data in motions.items():
         path = os.path.join(motion_dir, f"{name}.motion3.json")
-        with open(path, "w") as fh:
+        with open(path, "w", encoding="utf-8") as fh:
             json.dump(data, fh, indent=2, ensure_ascii=False)
             fh.write("\n")
         m = data["Meta"]
@@ -192,7 +192,7 @@ def main():
               f"segs={m['TotalSegmentCount']} pts={m['TotalPointCount']}")
 
     # Replace the whole Action group in model3.json (other groups untouched; idempotent)
-    model3 = json.load(open(model3_path))
+    model3 = json.load(open(model3_path, encoding="utf-8"))
     # setdefault so this also works on models that ship without any motions
     model3.setdefault("FileReferences", {}).setdefault("Motions", {})[GROUP] = [
         {
@@ -203,7 +203,7 @@ def main():
         }
         for name, disp, fin, fout in manifest
     ]
-    with open(model3_path, "w") as fh:
+    with open(model3_path, "w", encoding="utf-8") as fh:
         json.dump(model3, fh, indent=2, ensure_ascii=False)
         fh.write("\n")
     print(f"registered {len(manifest)} motions to {model3_path} [{GROUP}]")

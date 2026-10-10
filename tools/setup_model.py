@@ -63,7 +63,7 @@ def main():
     shutil.copytree(src_dir, target)
 
     rel_model3 = os.path.relpath(os.path.join(target, os.path.basename(model3)), ROOT)
-    with open(CONFIG, "w") as fh:
+    with open(CONFIG, "w", encoding="utf-8") as fh:
         json.dump({"name": stem, "model3": rel_model3.replace(os.sep, "/")},
                   fh, ensure_ascii=False, indent=2)
         fh.write("\n")

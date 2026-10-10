@@ -25,7 +25,7 @@ def resolve_runtime():
     cfg_path = os.path.join(ROOT, "model.config.json")
     if not os.path.exists(cfg_path):
         sys.exit("ERROR: model.config.json not found. Run python3 tools/setup_model.py first.")
-    cfg = json.load(open(cfg_path))
+    cfg = json.load(open(cfg_path, encoding="utf-8"))
     return os.path.join(ROOT, os.path.dirname(cfg["model3"]))
 
 
@@ -64,29 +64,29 @@ def main():
     model3 = find_one("*.model3.json")
     groups = {}
     if model3:
-        m3 = json.load(open(model3))
+        m3 = json.load(open(model3, encoding="utf-8"))
         groups = {g["Name"]: g["Ids"] for g in m3.get("Groups", [])}
         generated = {
             os.path.normpath(os.path.join(RUNTIME, e["File"]))
-            for e in m3["FileReferences"]["Motions"].get("Action", [])
+            for e in m3.get("FileReferences", {}).get("Motions", {}).get("Action", [])
         }
         motions = [f for f in motions if os.path.normpath(f) not in generated]
 
     names = {}
     if cdi:
-        for p in json.load(open(cdi))["Parameters"]:
+        for p in json.load(open(cdi, encoding="utf-8"))["Parameters"]:
             names[p["Id"]] = p["Name"]
 
     physics_outputs = set()
     if physics:
-        for s in json.load(open(physics))["PhysicsSettings"]:
+        for s in json.load(open(physics, encoding="utf-8"))["PhysicsSettings"]:
             for o in s["Output"]:
                 physics_outputs.add(o["Destination"]["Id"])
 
     stats = collections.defaultdict(lambda: [float("inf"), float("-inf"), 0])
     first_vals = collections.defaultdict(collections.Counter)
     for f in motions:
-        d = json.load(open(f))
+        d = json.load(open(f, encoding="utf-8"))
         for c in d["Curves"]:
             if c["Target"] != "Parameter":
                 continue
