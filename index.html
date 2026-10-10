@@ -300,9 +300,20 @@
       async function isLoopMotion(group, index) {
         const key = `${group}:${index}`;
         if (!(key in metaLoop)) {
-          const entry = groups[group][index];
-          const res = await fetch(settings.resolveURL(entry.File));
-          metaLoop[key] = group === NEW_GROUP && !!(await res.json()).Meta.Loop;
+          // An unknown group/index (a mistyped ?play=) used to throw here and kill
+          // the whole page after the model had loaded fine. Same for an unreadable
+          // or Meta-less motion file: looping is a nice-to-have, default to off.
+          const entry = (groups[group] || [])[index];
+          if (!entry || group !== NEW_GROUP) {
+            metaLoop[key] = false;
+          } else {
+            try {
+              const res = await fetch(settings.resolveURL(entry.File));
+              metaLoop[key] = res.ok && !!(await res.json()).Meta?.Loop;
+            } catch {
+              metaLoop[key] = false;
+            }
+          }
         }
         return metaLoop[key];
       }
@@ -565,7 +576,9 @@
         }, 300);
       }
       const play = params.get("play");
-      if (play) {
+      // A ?play= that names a non-existent group/index used to throw deep inside
+      // loadMotion and reject main() after the model had loaded fine.
+      if (play && (groups[play.split(":")[0]] || [])[Number(play.split(":")[1] || 0)]) {
         const [g, i] = play.split(":");
         const { ok: started, loop } = await playMotion(g, Number(i || 0), play);
         const startedAt = performance.now();
