@@ -21,7 +21,8 @@ cd "$(dirname "$0")/.."
 
 CHROME="${CHROME:-/Applications/Google Chrome.app/Contents/MacOS/Google Chrome}"
 PORT="${PORT:-8791}"
-OUT=tmp-verify
+# absolute path: Chromium on Windows refuses to write relative screenshot paths
+OUT="$PWD/tmp-verify"
 mkdir -p "$OUT"
 rm -f "$OUT"/*.png  # avoid mixing results from a previous run
 
