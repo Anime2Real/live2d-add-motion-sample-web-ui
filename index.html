@@ -584,7 +584,7 @@
         const startedAt = performance.now();
         status.textContent = `自動再生: ${play} started=${started}`;
         const cycles = Number(params.get("cycles"));
-        if (loop && cycles > 0) {
+        if (loop && current && cycles > 0) {
           // flip the flag mid-cycle so the motion ends exactly at the Nth seam
           setTimeout(finishAfterThisCycle, (cycles - 0.5) * current.duration * 1000);
         }

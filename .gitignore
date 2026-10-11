@@ -15,5 +15,8 @@ model.config.json
 motion-defs/*
 !motion-defs/hiyori_pro_t11.py
 
+# Python実行時に生成されるバイトコードキャッシュ
+__pycache__/
+
 # macOS
 .DS_Store

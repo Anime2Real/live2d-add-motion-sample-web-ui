@@ -72,10 +72,10 @@ if [ "${1:-}" = "--loop" ]; then
   dur=$(python3 - "$target" <<'EOF'
 import json, os, sys
 group, index = sys.argv[1].split(":")
-cfg = json.load(open("model.config.json"))
-m3 = json.load(open(cfg["model3"]))
-entry = m3["FileReferences"]["Motions"][group][int(index)]
-d = json.load(open(os.path.join(os.path.dirname(cfg["model3"]), entry["File"])))
+cfg = json.load(open("model.config.json", encoding="utf-8"))
+m3 = json.load(open(cfg["model3"], encoding="utf-8"))
+entry = m3.get("FileReferences", {}).get("Motions", {})[group][int(index)]
+d = json.load(open(os.path.join(os.path.dirname(cfg["model3"]), entry["File"]), encoding="utf-8"))
 if not d["Meta"]["Loop"]:
     sys.exit(f"{sys.argv[1]} is not a loop motion (Meta.Loop=false)")
 print(d["Meta"]["Duration"])
@@ -99,11 +99,11 @@ else
   # frozen at 40% of each motion's duration
   python3 - <<'EOF' | while read -r idx name freeze; do
 import json, os
-cfg = json.load(open("model.config.json"))
-m3 = json.load(open(cfg["model3"]))
+cfg = json.load(open("model.config.json", encoding="utf-8"))
+m3 = json.load(open(cfg["model3"], encoding="utf-8"))
 runtime = os.path.dirname(cfg["model3"])
-for i, e in enumerate(m3["FileReferences"]["Motions"].get("Action", [])):
-    d = json.load(open(os.path.join(runtime, e["File"])))
+for i, e in enumerate(m3.get("FileReferences", {}).get("Motions", {}).get("Action", [])):
+    d = json.load(open(os.path.join(runtime, e["File"]), encoding="utf-8"))
     stem = os.path.basename(e["File"]).replace(".motion3.json", "")
     print(i, stem, round(d["Meta"]["Duration"] * 0.4, 2))
 EOF
